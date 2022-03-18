@@ -1,0 +1,11 @@
+.Rproj.user
+.Rhistory
+.RData
+.Ruserdata
+
+# full data files
+input_data/ebd_full_no_obs.csv
+input_data/ebd_full_obs_parsed.csv
+input_data/ebd_full.csv
+input_data/ebd_full_obs.csv
+input_data/ebd_obs.xlsx
