@@ -1,0 +1,41 @@
+{
+  "type": "Feature",
+  "geometry": {
+    "type": "Polygon",
+    "coordinates": [
+      [
+        [-78.68750735, 34.541687],
+        [-78.68750735, 34.5000193],
+        [-78.62500716, 34.5000193],
+        [-78.62500716, 34.541687],
+        [-78.68750735, 34.541687]
+      ]
+    ]
+  },
+  "properties": {
+    "AREA_SQMI": "10.24026626",
+    "COUNTY": "BLADEN",
+    "ID_BLOCK": "ABBOTTSBURG-SE",
+    "ID_BLOCK_CODE": "34078E6SE",
+    "ID_EBD_NAME": "Abbottsburg SE",
+    "ID_NCBA_BLOCK": "ABBOTTSBURG-SE",
+    "ID_OLD_ID": "Abbottsburg-SE",
+    "ID_S123_NOSPACES": "Abbottsburg_SE",
+    "ID_S123_SPACES": "Abbottsburg SE",
+    "ID_WEB_BLOCKMAP": "Abbottsburg SE",
+    "NW_X": -78.68750735,
+    "NW_Y": 34.541687,
+    "POSITION": "Inside",
+    "PRIORITY": "1",
+    "QUADID": "34078E6",
+    "QUAD_BLOCK": "SE",
+    "QUAD_NAME": "ABBOTTSBURG",
+    "REGION": "4",
+    "SE_X": -78.62500716,
+    "SE_Y": 34.5000193,
+    "SUBNAT2": "US-NC-017",
+    "TYPE": "Priority",
+    "ID_S123_NOSPACES_TEMP": "Abbottsburg_SE",
+    "ID_S123_SPACES_TEMP": "Abbottsburg SE"
+  }
+}
