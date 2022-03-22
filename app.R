@@ -12,10 +12,16 @@ if(!require(shinythemes)) install.packages("shinythemes", repos = "http://cran.u
 
 #get functions from other files
 source("blocks.r")
+source("utils.r") #utilities file
 
 
 # SETUP FILES
 basemap = leaflet(ebd_data) %>% setView(lng = -78.6778808, lat = 35.7667941, zoom = 12) %>% addTiles() %>% addProviderTiles(providers$CartoDB.Positron) %>% addCircles()
+current_block = ""
+
+move_map <- function(lng, lat, zoom=12){
+  # add code here to move the map
+}
 
 
 # Define UI for miles per gallon app ----
@@ -35,7 +41,10 @@ ui <- bootstrapPage(
                         draggable = TRUE, height = "auto",
 
                         span(tags$i(h6("Checklists submitted to the NC Bird Atlas.")), style="color:#045a8d"),
-                        checkboxInput("portal_records","Portal Records Only", FALSE )
+                        checkboxInput("portal_records","Portal Records Only", FALSE ),
+                        selectInput("block_select", h3("Priority Blocks"),
+                          choices = priority_block_list),
+                        htmlOutput("selected_block", inline=FALSE)
           )
         )
     ),
@@ -58,7 +67,14 @@ ui <- bootstrapPage(
 # Define server logic to plot various variables against mpg ----
 server <- function(input, output) {
   #BLOCK TAB
+  #
+  current_block_r <- reactive({
+    # get(input$block_select)
+    current_block <- input$block_select
 
+    #ADD CODE HERE TO RE-ORIENT THE MAP (make a function?)
+
+  })
   ## reactive listener for portal checkboxInput
   reactive_portal = reactive({
     if (input$portal_records){
@@ -68,6 +84,11 @@ server <- function(input, output) {
       print("portal records false")
       ebd_data
     }
+  })
+
+  # reactive listener for block select
+  output$selected_block <-renderText({
+    paste(current_block_r())
   })
 
   # renders basemap on leaflet
