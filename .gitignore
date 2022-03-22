@@ -4,5 +4,5 @@
 .Ruserdata
 
 # full data files
-input_data/
 archive/
+input_data/block_comp_hours.xslx

@@ -1,0 +1,41 @@
+{
+  "type": "Feature",
+  "geometry": {
+    "type": "Polygon",
+    "coordinates": [
+      [
+        [-78.6875073, 34.58335386],
+        [-78.6875073, 34.54168589],
+        [-78.62500716, 34.54168589],
+        [-78.62500716, 34.58335386],
+        [-78.6875073, 34.58335386]
+      ]
+    ]
+  },
+  "properties": {
+    "AREA_SQMI": "10.23516421",
+    "COUNTY": "BLADEN",
+    "ID_BLOCK": "ABBOTTSBURG-CE",
+    "ID_BLOCK_CODE": "34078E6CE",
+    "ID_EBD_NAME": "Abbottsburg CE",
+    "ID_NCBA_BLOCK": "ABBOTTSBURG - CE",
+    "ID_OLD_ID": "Abbottsburg-CE",
+    "ID_S123_NOSPACES": "Abbottsburg_CE",
+    "ID_S123_SPACES": "Abbottsburg CE",
+    "ID_WEB_BLOCKMAP": "Abbottsburg CE",
+    "NW_X": -78.6875073,
+    "NW_Y": 34.58335386,
+    "POSITION": "Inside",
+    "PRIORITY": "0",
+    "QUADID": "34078E6",
+    "QUAD_BLOCK": "CE",
+    "QUAD_NAME": "ABBOTTSBURG",
+    "REGION": "4",
+    "SE_X": -78.62500716,
+    "SE_Y": 34.54168589,
+    "SUBNAT2": "US-NC-017",
+    "TYPE": "Non-priority",
+    "ID_S123_NOSPACES_TEMP": "Abbottsburg_CE",
+    "ID_S123_SPACES_TEMP": "Abbottsburg CE"
+  }
+}
