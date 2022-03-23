@@ -24,7 +24,7 @@ m_spp <- mongo("ebd_taxonomy", url = URI, options = ssl_options(weak_cert_valida
 # low checklist block -> "PAMLICO_BEACH-CW" or "GRIMESLAND-NW"
 # this works:
 #   get_mongo_data('{"ID_NCBA_BLOCK":"GRIMESLAND-CW"}', '{"OBSERVATION_DATE":1, "SAMPLING_EVENT_IDENTIFIER":1}', FALSE)
-#   get_mongo_data('{"OBSERVATIONS.COMMON_NAME":"Cerulean Warbler"}', '{"OBSERVATION_DATE":1, "SAMPLING_EVENT_IDENTIFIER":1, "OBSERVATIONS.COMMON_NAME":1, "OBSERVATIONS.OBSERVATION_COUNT":1, "OBSERVATIONS.BEHAVIOR_CODE":1, "OBSERVATIONS.BREEDING_CATEGORY":1, "OBSERVATIONS.BEHAVIOR_CODE":1}')
+#   get_mongo_data('{"OBSERVATIONS.COMMON_NAME":"Cerulean Warbler"}', '{"OBSERVATION_DATE":1, "SAMPLING_EVENT_IDENTIFIER":1, "OBSERVATIONS.COMMON_NAME":1, "OBSERVATIONS.OBSERVATION_COUNT":1, "OBSERVATIONS.BEHAVIOR_CODE":1, "OBSERVATIONS.BREEDING_CATEGORY":1}')
 
 get_ebd_data <- function(query="{}", filter="{}"){
   print(filter)
@@ -37,14 +37,17 @@ get_ebd_data <- function(query="{}", filter="{}"){
       print("return obs")
       # EXAMPLE/TESTING
       # USE aggregation pipeline syntax to return only needed observations
-      pipeline <- str_interp('[{$match: ${query}}, {$project:${filter}}, {$unwind: {path: "$OBSERVATIONS"}}]')
-
-      mongodata <- m$aggregate(pipeline) %>%
-      unnest(cols = (c(OBSERVATIONS)))
+      # pipeline <- str_interp('[{$match: ${query}}, {$project:${filter}}, {$unwind: {path: "$OBSERVATIONS"}}]')
+      #
+      # mongodata <- m$aggregate(pipeline) %>%
+      # unnest(cols = (c(OBSERVATIONS)))
 
       # OLD VERSION - downloads and returns all checklist obs
-      # mongodata <- m$find(query, filter) %>%
-      # unnest(cols = (c(OBSERVATIONS))) # Expand observations
+      # mongodata <- m$find(query, filter)
+      mongodata <- m$find(query, filter) %>%
+      unnest(cols = (c(OBSERVATIONS))) # Expand observations
+      # print(head(mongodata))
+
     } else {
       print("do not return obs")
       mongodata <- m$find(query, filter)
@@ -55,18 +58,32 @@ get_ebd_data <- function(query="{}", filter="{}"){
   }
 }
 
+
 #####################################################################################
 # Species
+get_spp_obs <- function(species, filter){
+  # wrapper function for retrieving species records
+  query <- str_interp('{"OBSERVATIONS.COMMON_NAME":"${species}"}')
+  print(query)
+  results <- get_ebd_data(query, filter) %>%
+  filter(COMMON_NAME == species)
+  print(head(results))
+  # results <- get_ebd_data(query, filter) %>%
+  # filter("COMMON_NAME" == species)
+
+  # print(head(results))
+  return(results)
+}
 
 # Get Species List
-get_spp_data <- function(query="{}",filter="{}"){
+get_spp_list <- function(query="{}",filter="{}"){
 
   mongodata <- m_spp$find(query, filter)
 
   return(mongodata)
 }
 
-species_list = get_spp_data(filter='{"PRIMARY_COM_NAME":1}')$PRIMARY_COM_NAME
+species_list = get_spp_list(filter='{"PRIMARY_COM_NAME":1}')$PRIMARY_COM_NAME
 
 
 

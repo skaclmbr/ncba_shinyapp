@@ -32,7 +32,7 @@ h1, h2, h3, h4 { font-weight: 400; }
 
 #controls:hover {
   /* Fade in while hovering */
-  opacity: 0.75;
+  opacity: 0.90;
   transition-delay: 0;
 }
 

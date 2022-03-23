@@ -12,9 +12,16 @@ if(!require(leaflet)) install.packages("leaflet", repos = "http://cran.us.r-proj
 if(!require(geojsonio)) install.packages("geojsonio", repos = "http://cran.us.r-project.org")
 if(!require(shinythemes)) install.packages("shinythemes", repos = "http://cran.us.r-project.org")
 
+#libraries for spp data
+if(!require(lubridate)) install.packages("lubridate", repos = "http://cran.us.r-project.org")
+if(!require(grid)) install.packages("grid", repos = "http://cran.us.r-project.org")
+if(!require(gridBase)) install.packages("gridBase", repos = "http://cran.us.r-project.org")
+if(!require(RColorBrewer)) install.packages("RColorBrewer", repos = "http://cran.us.r-project.org")
+
 #get functions from other files
 source("blocks.r")
 source("utils.r") #utilities file
+source("spp.r") #species function file
 
 
 # SETUP FILES
@@ -39,24 +46,33 @@ ui <- bootstrapPage(
           leafletOutput("mymap", width="100%", height="100%"),
 
           absolutePanel(id = "controls", class = "panel panel-default",
-                        top = 60, left = 55, width = 250, fixed=TRUE,
+                        top = 60, left = 55, width = 350, fixed=TRUE,
                         draggable = TRUE, height = "auto",
 
-                        span(tags$i(h6("Checklists submitted to the NC Bird Atlas.")), style="color:#045a8d"),
+                        # span(tags$i(h6("Checklists submitted to the NC Bird Atlas.")), style="color:#045a8d"),
                         checkboxInput("portal_records","Portal Records Only", FALSE ),
                         selectInput("block_select", h3("Priority Blocks"),
-                          choices = priority_block_list),
+                          choices = priority_block_list, selected=" "),
                         htmlOutput("selected_block", inline=FALSE),
-                        verbatimTextOutput("testoutput"),
-                        plotOutput("blockhours"),
+                        plotOutput("blockhours")
           )
         )
     ),
     tabPanel("Species",
-      mainPanel(
-        selectInput("spp_select", h3("Species"),
-          choices = species_list)
+      div(class="container-fluid", tags$head(includeCSS("styles.css")),
+        div(class="col-md-3",
+          selectInput("spp_select", h3("Species"),
+          choices = species_list, selected=" ")
+        ),
+        div(class="col-md-9",
+          plotOutput("spp_breedingbox_plot"),
+          # plotOutput("spp_coords_plot"),
+          # plotOutput("spp_starttimes_plot"),
+          # plotOutput("spp_traveldist_plot"),
+          # plotOutput("spp_mineffort_plot"),
+          # plotOutput("spp_localitytype_plot")
       )
+    )
     ),
     tabPanel("About",
       tags$div(
@@ -92,7 +108,7 @@ server <- function(input, output, session) {
     # ggplot2(get_block_hours(current_block_r())$Value)
     # ggplot(get_block_hours(current_block_r()), aes(YEAR_MONTH, Value, color="#2a3b4d"))
     # ggplot(data=get_block_hours("RALEIGH_EAST-SE")) + geom_bar(mapping = aes(YEAR_MONTH, Value, color="#2a3b4d"))
-    ggplot(data=get_block_hours(current_block_r()),aes(YEAR_MONTH, Value)) + geom_col(fill="#2a3b4d")+ guides(x = guide_axis(angle = 90))
+    ggplot(data=get_block_hours(current_block_r()),aes(YEAR_MONTH, Value)) + geom_col(fill="#2a3b4d")+ guides(x = guide_axis(angle = 90)) + ylab("Hours") + xlab("Year-Month")
   })
 
 
@@ -129,6 +145,62 @@ server <- function(input, output, session) {
       addCircles(data=reactive_portal())
 
   })
+
+  #######################################################
+  # Species info
+
+  current_spp_r <- reactive({
+    # get(input$block_select)
+    current_spp <- input$spp_select
+  })
+
+#   # execute a query
+# query <- str_interp('{"OBSERVATIONS.COMMON_NAME":"${species}"}')
+#
+# nc_data <- connection$find(query) %>%
+#   unnest(cols = (c(OBSERVATIONS))) %>% # Expand observations
+#   filter(COMMON_NAME == species)
+#
+# # format columns
+# ebird <- to_ebd_format(nc_data, drop=FALSE)
+
+
+
+output$spp_breedingbox_plot <- renderPlot({
+
+  # PLOT BREEDING CODES ----------------------------------------------------------
+  lump <- list(S = c("S", "S7", "M"), O = c("", "F", "O", "NC"))
+  no_plot_codes <- NULL
+  out_pdf <- NULL
+  spp <- current_spp_r()
+  # query <- str_interp('{"OBSERVATIONS.COMMON_NAME":"${spp}"}')
+  query <- str_interp('{"OBSERVATIONS.COMMON_NAME":"${spp}"}')
+  filter <- str_interp('{"OBSERVATION_DATE":1, "OBSERVATIONS.BREEDING_CODE":1, "OBSERVATIONS.COMMON_NAME":1}')
+  # ebird <- get_ebd_data(query, filter)
+  ebird <- get_spp_obs(spp, filter)
+  # print(head(ebird))
+  print("getting ready to box plot")
+
+  breeding_boxplot(spp, ebird, pallet="Paired", out_pdf=NULL, no_plot_codes=no_plot_codes, lump=lump, drop=TRUE)
+})
+
+#
+# # SUMMARIZE START TIMES --------------------------------------------------------
+# plot(start_time_boxplot(ebird))
+
+# # PLOT COORDINATES OF RECORDS --------------------------------------------------
+# coords.plot <- plot_checklists_coords(ebird)
+# plot(coords.plot)
+#
+# # SUMMARIZE TRAVEL DISTANCE ----------------------------------------------------
+# plot(effort_distance_boxplot(ebird))
+#
+# # SUMMARIZE MINUTES EFFORT --------------------------------------------------------
+# plot(duration_minutes_boxplot(ebird))
+#
+# # LOCALITY TYPE BREAKDOWN ------------------------------------------------------
+# plot(locality_type_pie(ebird))
+
 
 
 }
