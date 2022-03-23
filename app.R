@@ -5,6 +5,8 @@
 # https://github.com/skaclmbr
 
 library(shiny)
+library(tidyverse)
+library(mongolite) #connecting to the mongodb
 if(!require(dplyr)) install.packages("dplyr", repos = "http://cran.us.r-project.org")
 if(!require(leaflet)) install.packages("leaflet", repos = "http://cran.us.r-project.org")
 if(!require(geojsonio)) install.packages("geojsonio", repos = "http://cran.us.r-project.org")
@@ -44,17 +46,22 @@ ui <- bootstrapPage(
                         checkboxInput("portal_records","Portal Records Only", FALSE ),
                         selectInput("block_select", h3("Priority Blocks"),
                           choices = priority_block_list),
-                        htmlOutput("selected_block", inline=FALSE)
+                        htmlOutput("selected_block", inline=FALSE),
+                        verbatimTextOutput("testoutput"),
+                        plotOutput("blockhours"),
           )
         )
     ),
     tabPanel("Species",
-
+      mainPanel(
+        selectInput("spp_select", h3("Species"),
+          choices = species_list)
+      )
     ),
     tabPanel("About",
       tags$div(
         tags$h4("NC Bird Atlas Data Explorer"),
-        "This site is a work in progress, designed to provide access to data collected through the North Carolina Bird Atlas. Data submitted to eBird is updated on a monthly basis.",
+        p("This site is a work in progress, designed to provide access to data collected through the North Carolina Bird Atlas. Data submitted to eBird is updated on a monthly basis."),
         tags$br(),
         tags$img(src = "ncba_logo_blue_halo_final.png", width = "150px", height = "75px")
 
@@ -65,7 +72,7 @@ ui <- bootstrapPage(
 )
 
 # Define server logic to plot various variables against mpg ----
-server <- function(input, output) {
+server <- function(input, output, session) {
   #BLOCK TAB
   #
   current_block_r <- reactive({
@@ -75,6 +82,20 @@ server <- function(input, output) {
     #ADD CODE HERE TO RE-ORIENT THE MAP (make a function?)
 
   })
+
+  #used for testing changes in values
+  output$testoutput <- renderPrint({input$block_select})
+
+  #block hours summary
+  output$blockhours <- renderPlot({
+    print(current_block_r())
+    # ggplot2(get_block_hours(current_block_r())$Value)
+    # ggplot(get_block_hours(current_block_r()), aes(YEAR_MONTH, Value, color="#2a3b4d"))
+    # ggplot(data=get_block_hours("RALEIGH_EAST-SE")) + geom_bar(mapping = aes(YEAR_MONTH, Value, color="#2a3b4d"))
+    ggplot(data=get_block_hours(current_block_r()),aes(YEAR_MONTH, Value)) + geom_col(fill="#2a3b4d")+ guides(x = guide_axis(angle = 90))
+  })
+
+
   ## reactive listener for portal checkboxInput
   reactive_portal = reactive({
     if (input$portal_records){
@@ -96,7 +117,7 @@ server <- function(input, output) {
     leaflet() %>%
       setView(lng = -78.6778808, lat = 35.7667941, zoom = 6) %>%
       # addTiles() %>%
-      addTopoJSON(priority_block_geojson, weight= 1, color="#2a3a4d", fill = FALSE) %>%
+      addGeoJSON(priority_block_geojson, weight= 1, color="#2a3a4d", fill = FALSE) %>%
       addProviderTiles(providers$CartoDB.Positron)
   })
 
@@ -108,6 +129,7 @@ server <- function(input, output) {
       addCircles(data=reactive_portal())
 
   })
+
 
 }
 
