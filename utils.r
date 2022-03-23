@@ -67,11 +67,7 @@ get_spp_obs <- function(species, filter){
   print(query)
   results <- get_ebd_data(query, filter) %>%
   filter(COMMON_NAME == species)
-  print(head(results))
-  # results <- get_ebd_data(query, filter) %>%
-  # filter("COMMON_NAME" == species)
 
-  # print(head(results))
   return(results)
 }
 

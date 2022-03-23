@@ -4,9 +4,10 @@
 # Scott K. Anderson
 # https://github.com/skaclmbr
 
-library(shiny)
-library(tidyverse)
-library(mongolite) #connecting to the mongodb
+
+if(!require(shiny)) install.packages("shiny", repos = "http://cran.us.r-project.org")
+if(!require(tidyverse)) install.packages("tidyverse", repos = "http://cran.us.r-project.org")
+if(!require(mongolite)) install.packages("mongolite", repos = "http://cran.us.r-project.org")
 if(!require(dplyr)) install.packages("dplyr", repos = "http://cran.us.r-project.org")
 if(!require(leaflet)) install.packages("leaflet", repos = "http://cran.us.r-project.org")
 if(!require(geojsonio)) install.packages("geojsonio", repos = "http://cran.us.r-project.org")
@@ -154,18 +155,6 @@ server <- function(input, output, session) {
     current_spp <- input$spp_select
   })
 
-#   # execute a query
-# query <- str_interp('{"OBSERVATIONS.COMMON_NAME":"${species}"}')
-#
-# nc_data <- connection$find(query) %>%
-#   unnest(cols = (c(OBSERVATIONS))) %>% # Expand observations
-#   filter(COMMON_NAME == species)
-#
-# # format columns
-# ebird <- to_ebd_format(nc_data, drop=FALSE)
-
-
-
 output$spp_breedingbox_plot <- renderPlot({
 
   # PLOT BREEDING CODES ----------------------------------------------------------
@@ -173,13 +162,9 @@ output$spp_breedingbox_plot <- renderPlot({
   no_plot_codes <- NULL
   out_pdf <- NULL
   spp <- current_spp_r()
-  # query <- str_interp('{"OBSERVATIONS.COMMON_NAME":"${spp}"}')
   query <- str_interp('{"OBSERVATIONS.COMMON_NAME":"${spp}"}')
   filter <- str_interp('{"OBSERVATION_DATE":1, "OBSERVATIONS.BREEDING_CODE":1, "OBSERVATIONS.COMMON_NAME":1}')
-  # ebird <- get_ebd_data(query, filter)
   ebird <- get_spp_obs(spp, filter)
-  # print(head(ebird))
-  print("getting ready to box plot")
 
   breeding_boxplot(spp, ebird, pallet="Paired", out_pdf=NULL, no_plot_codes=no_plot_codes, lump=lump, drop=TRUE)
 })
