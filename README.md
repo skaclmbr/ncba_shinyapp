@@ -1,16 +1,21 @@
 # NC Bird Atlas Explorer Tool
 Shiny App implementation to display data from the North Carolina Bird Atlas.
 
-# MongoDB
-The bulk of the NCBA data is stored in a MongoDB Atlas implementation.
 
-# Utilities
+## Utilities (utils.r)
 Stores functions to be used elsewhere
 
-# Blocks
+### MongoDB
+The bulk of the NCBA data is stored in a MongoDB Atlas implementation.
+
+Functions:
+- get_ebd_data(query, filter)
+- get_spp_data()
+
+## Blocks
 Diplays block level information.
 
-# Species
+## Species
 Displays species level information.
 
 
