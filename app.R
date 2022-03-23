@@ -16,7 +16,7 @@ source("utils.r") #utilities file
 
 
 # SETUP FILES
-basemap = leaflet(ebd_data) %>% setView(lng = -78.6778808, lat = 35.7667941, zoom = 12) %>% addTiles() %>% addProviderTiles(providers$CartoDB.Positron) %>% addCircles()
+# basemap = leaflet(ebd_data) %>% setView(lng = -78.6778808, lat = 35.7667941, zoom = 12) %>% addTiles() %>% addProviderTiles(providers$CartoDB.Positron) %>% addCircles()
 current_block = ""
 
 move_map <- function(lng, lat, zoom=12){
@@ -26,9 +26,9 @@ move_map <- function(lng, lat, zoom=12){
 
 # Define UI for miles per gallon app ----
 ui <- bootstrapPage(
-  titlePanel("NC Bird Atlas Explorer"),
+  # titlePanel("NC Bird Atlas Explorer"),
   navbarPage(
-    theme = shinytheme("flatly"), collapsible=TRUE,
+    theme = shinytheme("cosmo"), collapsible=TRUE,
     HTML('<a style="text-decoration:none;cursor:default;color:#FFFFFF;" class="active" href="#">NC Bird Atlas Data Explorer</a>'), id="nav",
     windowTitle = "NCBA Explorer",
     tabPanel("Blocks",
@@ -37,7 +37,7 @@ ui <- bootstrapPage(
           leafletOutput("mymap", width="100%", height="100%"),
 
           absolutePanel(id = "controls", class = "panel panel-default",
-                        top = 150, left = 55, width = 250, fixed=TRUE,
+                        top = 60, left = 55, width = 250, fixed=TRUE,
                         draggable = TRUE, height = "auto",
 
                         span(tags$i(h6("Checklists submitted to the NC Bird Atlas.")), style="color:#045a8d"),
@@ -93,10 +93,14 @@ server <- function(input, output) {
 
   # renders basemap on leaflet
   output$mymap <- renderLeaflet({
-    basemap
+    leaflet() %>%
+      setView(lng = -78.6778808, lat = 35.7667941, zoom = 6) %>%
+      # addTiles() %>%
+      addTopoJSON(priority_block_geojson, weight= 1, color="#2a3a4d", fill = FALSE) %>%
+      addProviderTiles(providers$CartoDB.Positron)
   })
 
-  ## plots checklists on map
+  # plots checklists on map
   observeEvent(input$portal_records,{
     leafletProxy("mymap") %>%
       clearMarkers() %>%
