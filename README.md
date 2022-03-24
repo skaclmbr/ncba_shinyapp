@@ -1,4 +1,8 @@
 # NC Bird Atlas Explorer Tool
+ARCHIVED!
+
+This project has been moved to https://github.com/nmtarr/NCBA - check it out there!
+
 Shiny App implementation to display data from the North Carolina Bird Atlas.
 
 
