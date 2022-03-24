@@ -10,7 +10,7 @@ if(!require(tidyverse)) install.packages("tidyverse", repos = "http://cran.us.r-
 if(!require(mongolite)) install.packages("mongolite", repos = "http://cran.us.r-project.org")
 if(!require(dplyr)) install.packages("dplyr", repos = "http://cran.us.r-project.org")
 if(!require(leaflet)) install.packages("leaflet", repos = "http://cran.us.r-project.org")
-if(!require(geojsonio)) install.packages("geojsonio", repos = "http://cran.us.r-project.org")
+#if(!require(geojsonio)) install.packages("geojsonio", repos = "http://cran.us.r-project.org")
 if(!require(shinythemes)) install.packages("shinythemes", repos = "http://cran.us.r-project.org")
 
 #libraries for spp data
@@ -166,6 +166,7 @@ output$spp_breedingbox_plot <- renderPlot({
   filter <- str_interp('{"OBSERVATION_DATE":1, "OBSERVATIONS.BREEDING_CODE":1, "OBSERVATIONS.COMMON_NAME":1}')
   ebird <- get_spp_obs(spp, filter)
 
+  grid::current.viewport()
   breeding_boxplot(spp, ebird, pallet="Paired", out_pdf=NULL, no_plot_codes=no_plot_codes, lump=lump, drop=TRUE)
 })
 

@@ -7,14 +7,14 @@
 # FROM - ADD CREDIT HERE!
 breeding_boxplot <- function(species, ebird, pallet, out_pdf, no_plot_codes,
                              lump, drop, cex.x.axis = 0.9, cex.y.axis = 0.8) {
- print("starting Breeding_Boxplot function")
- print(species)
+
  # print(ebird)
   # Produces a boxplot of breeding codes over calendar day.
+  # derived from
   #
   # Description:
   #   Produces a boxplot of breeding codes with some customization options.
-  #     Copied from the wbbii_tools repo.
+  #     Copied from https://github.com/ngwalton/wbba_tools.
   #
   # Arguments:
   # species -- common name of the species

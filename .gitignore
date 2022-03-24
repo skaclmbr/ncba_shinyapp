@@ -6,3 +6,11 @@
 # full data files
 archive/
 input_data/block_comp_hours.xslx
+
+# elements not needed in deployment
+app_v1.R
+blocks_one.geojson
+config.r
+gtag.html
+/www
+/rsconnect
