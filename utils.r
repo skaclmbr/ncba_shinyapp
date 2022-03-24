@@ -16,6 +16,7 @@ URI = sprintf("mongodb://%s:%s@%s/%s?authSource=admin&replicaSet=atlas-3olgg1-sh
 # connect to a specific collection (table)
 m <- mongo(COLLECTION, url = URI, options = ssl_options(weak_cert_validation = T))
 m_spp <- mongo("ebd_taxonomy", url = URI, options = ssl_options(weak_cert_validation = T))
+m_blocks <- mongo("blocks", url = URI, options = ssl_options(weak_cert_validation = T))
 
 
 # return records for the species
@@ -63,8 +64,40 @@ get_ebd_data <- function(query="{}", filter="{}"){
     return(mongodata)
   }
 }
+get_block_data <- function() {
+  # Retrieves block data table from MongoDB Atlas implementation
+  blockdata <- m_blocks$find("{}","{}")
+  return(blockdata)
 
+}
+get_block_checklists <- function(block = "", portal = FALSE) (
+  # Retrieves data from MongoDB Atlas implementation
+  #
+  # Description:
+  #   Returns a dataframe of records from the NC Bird Atlas MongoDB implementation in a format to plot on the map.
+  #
+  # Arguments:
+  # block -- string that corresponds to the ID_NCBA_BLOCK field
+  #
+  # Examples:
+  #   1. Retrieve checklists submitted to the portal from the GRIMESLAND-CW block
+  #     get_block_checklists('GRIMESLAND-CW', TRUE)
 
+  if (block != ""){
+    if (portal) {
+      query <- str_interp('{"ID_NCBA_BLOCK":"${block}", "PROJECT_CODE":"EBIRD_ATL_NC"}')
+    } else {
+      query <- str_interp('{"ID_NCBA_BLOCK":"${block}"}')
+    }
+    print(query)
+
+    filter <- '{"LATITUDE":1, "LONGITUDE":1, "SAMPLING_EVENT_IDENTIFIER":1, "LOCALITY_ID":1, "OBSERVATION_DATE":1}'
+    print(filter)
+
+    return(get_ebd_data(query, filter))
+  }
+
+)
 #####################################################################################
 # Species
 get_spp_obs <- function(species, filter){
@@ -102,9 +135,10 @@ species_list = get_spp_list(filter='{"PRIMARY_COM_NAME":1}')$PRIMARY_COM_NAME
 #####################################################################################
 # Block level summaries
 
-block_data <- read.csv("input_data/blocks.csv") %>% filter(COUNTY == "WAKE")
+# block_data <- read.csv("input_data/blocks.csv") %>% filter(COUNTY == "WAKE")
+block_data <- get_block_data()
 priority_block_geojson <- readLines("input_data/blocks_priority.geojson")
-priority_block_data <- subset(block_data, PRIORITY=1)
+priority_block_data <- filter(block_data, PRIORITY==1)
 priority_block_list <- select(priority_block_data,ID_NCBA_BLOCK,ID_BLOCK_CODE)
 
 
@@ -124,7 +158,12 @@ get_block_hours <- function(id_ncba_block) {
   # Examples:
   #   1. Retrieve OBSERVATION_DATE and SAMPLING_EVENT_IDENTIFIER columns from checklists where Cerulean Warbler was observed
   #     get_spp_obs('Cerulean Warbler', '{"OBSERVATION_DATE":1, "SAMPLING_EVENT_IDENTIFIER":1}')
+  print(id_ncba_block)
+  if (length(id_ncba_block) >0){
+    result <- filter(block_hours_month, ID_NCBA_BLOCK == id_ncba_block)
+  }
+  if (length(result)>0){
+    return(result)
 
-  result <- filter(block_hours_month, ID_NCBA_BLOCK == id_ncba_block)
-  return(result)
+  }
 }

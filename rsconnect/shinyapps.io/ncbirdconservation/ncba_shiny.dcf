@@ -5,10 +5,10 @@ account: ncbirdconservation
 server: shinyapps.io
 hostUrl: https://api.shinyapps.io/v1
 appId: 5261914
-bundleId: 5721890
+bundleId: 5723078
 url: https://ncbirdconservation.shinyapps.io/ncba_shiny/
-when: 1648124751.26514
-lastSyncTime: 1648124751.26514
+when: 1648140699.00567
+lastSyncTime: 1648140699.00567
 asMultiple: FALSE
 asStatic: FALSE
-ignoredFiles: .gitattributes|.RData|app_v1.R|blocks_one.geojson|config.r|gtag.html|www
+ignoredFiles: .gitattributes|.RData|app_v1.R|blocks_one.geojson|config.r|gtag.html

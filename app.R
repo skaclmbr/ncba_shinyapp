@@ -24,14 +24,17 @@ source("blocks.r")
 source("utils.r") #utilities file
 source("spp.r") #species function file
 
+# MAP CONSTANTS
+nc_center_lat = 35.5
+nc_center_lng = -79.2
+nc_center_zoom = 6
+nc_block_zoom = 13
+
 
 # SETUP FILES
 # basemap = leaflet(ebd_data) %>% setView(lng = -78.6778808, lat = 35.7667941, zoom = 12) %>% addTiles() %>% addProviderTiles(providers$CartoDB.Positron) %>% addCircles()
 current_block = ""
 
-move_map <- function(lng, lat, zoom=12){
-  # add code here to move the map
-}
 
 
 # Define UI for miles per gallon app ----
@@ -51,11 +54,18 @@ ui <- bootstrapPage(
                         draggable = TRUE, height = "auto",
 
                         # span(tags$i(h6("Checklists submitted to the NC Bird Atlas.")), style="color:#045a8d"),
-                        checkboxInput("portal_records","Portal Records Only", FALSE ),
-                        selectInput("block_select", h3("Priority Blocks"),
-                          choices = priority_block_list, selected=" "),
+                        h3("Map Controls"),
+                        h3("Checklists"),
+                        tags$ol(class="ol-nodots",
+                          checkboxInput("show_checklists","Display Checklists", FALSE ),
+                          checkboxInput("portal_records","Portal Records Only", FALSE )
+                        ),
+                        h3("Priority Block"),
+                        # selectInput("block_select", h3("Priority Blocks"),
+                        #   choices = priority_block_list, selected=" "),
                         htmlOutput("selected_block", inline=FALSE),
-                        plotOutput("blockhours")
+                        plotOutput("blockhours"),
+                        verbatimTextOutput("testingoutput")
           )
         )
     ),
@@ -90,62 +100,112 @@ ui <- bootstrapPage(
 
 # Define server logic to plot various variables against mpg ----
 server <- function(input, output, session) {
-  #BLOCK TAB
+
+
+  ########################################################################################
+  ########################################################################################
+  # BLOCK TAB
+
+  ########################################################################################
+  # CHECKLISTS
+  ## reactive listener for show checklist checkboxInput
+  # show_checklists = reactive({
+  #   paste(input$show_checklists)
+  # })
+  #
+  # ## reactive listener for portal checkboxInput
+  # show_portal_only = reactive({
+  #   paste(input$portal_records)
+  # })
+
+  checklist_events <- reactive({
+    list(input$show_checklists, input$portal_records, current_block_r())
+  })
+
+  ########################################################################################
+  # BLOCKS
+  # reactive listener for block select
   #
   current_block_r <- reactive({
     # get(input$block_select)
-    current_block <- input$block_select
 
-    #ADD CODE HERE TO RE-ORIENT THE MAP (make a function?)
+    geojson_info <- input$mymap_geojson_click
+    paste(geojson_info$properties$ID_NCBA_BLOCK)
 
   })
 
-  #used for testing changes in values
-  output$testoutput <- renderPrint({input$block_select})
-
-  #block hours summary
-  output$blockhours <- renderPlot({
-    print(current_block_r())
-    # ggplot2(get_block_hours(current_block_r())$Value)
-    # ggplot(get_block_hours(current_block_r()), aes(YEAR_MONTH, Value, color="#2a3b4d"))
-    # ggplot(data=get_block_hours("RALEIGH_EAST-SE")) + geom_bar(mapping = aes(YEAR_MONTH, Value, color="#2a3b4d"))
-    ggplot(data=get_block_hours(current_block_r()),aes(YEAR_MONTH, Value)) + geom_col(fill="#2a3b4d")+ guides(x = guide_axis(angle = 90)) + ylab("Hours") + xlab("Year-Month")
-  })
-
-
-  ## reactive listener for portal checkboxInput
-  reactive_portal = reactive({
-    if (input$portal_records){
-      print("portal records true")
-      ebd_data %>% filter(PROJECT_CODE == "EBIRD_ATL_NC")
-    } else {
-      print("portal records false")
-      ebd_data
-    }
-  })
-
-  # reactive listener for block select
+  #label for current selected block
   output$selected_block <-renderText({
+    req(current_block_r())
     paste(current_block_r())
   })
 
+  #block hours summary plot
+  output$blockhours <- renderPlot({
+    # ggplot2(get_block_hours(current_block_r())$Value)
+    # ggplot(get_block_hours(current_block_r()), aes(YEAR_MONTH, Value, color="#2a3b4d"))
+    # ggplot(data=get_block_hours("RALEIGH_EAST-SE")) + geom_bar(mapping = aes(YEAR_MONTH, Value, color="#2a3b4d"))
+    req(current_block_r())
+    ggplot(data=get_block_hours(current_block_r()),aes(YEAR_MONTH, Value)) + geom_col(fill="#2a3b4d")+ guides(x = guide_axis(angle = 90)) + ylab("Hours") + xlab("Year-Month")
+  })
+
+  ########################################################################################
+  # MAP
   # renders basemap on leaflet
   output$mymap <- renderLeaflet({
     leaflet() %>%
-      setView(lng = -78.6778808, lat = 35.7667941, zoom = 6) %>%
+      setView(lng = nc_center_lng, lat = nc_center_lat, zoom = nc_center_zoom) %>%
       # addTiles() %>%
-      addGeoJSON(priority_block_geojson, weight= 1, color="#2a3a4d", fill = FALSE) %>%
-      addProviderTiles(providers$CartoDB.Positron)
+      addProviderTiles(providers$CartoDB.Positron) %>%
+      addGeoJSON(priority_block_geojson, weight= 3, color="#2a3a4d", fill = TRUE)
   })
 
+  observeEvent(current_block_r(), {
+      req(current_block_r())
+      block_info <- filter(block_data, ID_NCBA_BLOCK==current_block_r())
+      block_lat <- block_info$NW_Y
+      block_lng <- block_info$NW_X
+      print(block_info)
+      print(block_lat)
+      print(block_lng)
+
+      leafletProxy("mymap", session) %>%
+        setView(lat = block_lat, lng = block_lng , zoom = nc_block_zoom)
+
+  })
+
+  # show checklists on the map
+  observeEvent(checklist_events(), {
+    req(current_block_r())
+    if (input$show_checklists){
+      # check to make sure records returned!
+      checklists <- get_block_checklists(current_block_r(),input$portal_records)
+      if (length(checklists) > 0){
+        leafletProxy("mymap") %>%
+          clearMarkers() %>%
+          clearShapes() %>%
+          addCircles(data=checklists)
+      }
+    } else {
+
+      leafletProxy("mymap") %>%
+        clearMarkers() %>%
+        clearShapes()
+
+    }
+  })
   # plots checklists on map
-  observeEvent(input$portal_records,{
-    leafletProxy("mymap") %>%
-      clearMarkers() %>%
-      clearShapes() %>%
-      addCircles(data=reactive_portal())
+  # observeEvent(input$portal_records,{
+  #   leafletProxy("mymap") %>%
+  #     clearMarkers() %>%
+  #     clearShapes() %>%
+  #     addCircles(data=reactive_portal())
+  #
+  # })
 
-  })
+  ########################################################################################
+  ########################################################################################
+  # SPECIES TAB
 
   #######################################################
   # Species info
