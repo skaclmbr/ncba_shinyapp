@@ -77,6 +77,7 @@ ui <- bootstrapPage(
         ),
         div(class="col-md-9",
           plotOutput("spp_breedingbox_plot"),
+          tableOutput("breeding_code_legend")
           # plotOutput("spp_coords_plot"),
           # plotOutput("spp_starttimes_plot"),
           # plotOutput("spp_traveldist_plot"),
@@ -214,6 +215,8 @@ server <- function(input, output, session) {
     # get(input$block_select)
     current_spp <- input$spp_select
   })
+
+output$breeding_code_legend <- renderTable(breeding_codes_key)
 
 output$spp_breedingbox_plot <- renderPlot({
 
